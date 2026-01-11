@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -9,7 +9,7 @@ import { postsAPI, snapchatAPI, authAPI } from '@/lib/api';
 import { FiFileText, FiCheckCircle, FiClock, FiTrendingUp, FiEye } from 'react-icons/fi';
 import Link from 'next/link';
 
-export default function DashboardPage() {
+function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [analytics, setAnalytics] = useState<any>(null);
@@ -216,5 +216,19 @@ export default function DashboardPage() {
         </div>
       </div>
     </ProtectedRoute>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <ProtectedRoute>
+        <div className="min-h-screen flex items-center justify-center">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
+      </ProtectedRoute>
+    }>
+      <DashboardContent />
+    </Suspense>
   );
 }
