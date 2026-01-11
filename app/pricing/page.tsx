@@ -68,6 +68,9 @@ export default function PricingPage() {
           <p className="text-xl opacity-70">
             Select the perfect plan for your content creation needs
           </p>
+          <p className="text-sm opacity-60 mt-2">
+            All prices are in Indian Rupees (₹ INR)
+          </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -84,8 +87,18 @@ export default function PricingPage() {
               <div className="card-body">
                 <h2 className="card-title text-2xl">{plan.name}</h2>
                 <div className="my-4">
-                  <span className="text-5xl font-bold">${plan.price}</span>
-                  <span className="opacity-70">/{plan.interval}</span>
+                  {plan.priceINR ? (
+                    <>
+                      <span className="text-5xl font-bold">₹{plan.priceINR.toLocaleString('en-IN')}</span>
+                      <span className="opacity-70">/{plan.interval}</span>
+                      <div className="text-sm opacity-60 mt-1">(≈ ${plan.price} USD)</div>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-5xl font-bold">Free</span>
+                      <span className="opacity-70">/{plan.interval}</span>
+                    </>
+                  )}
                 </div>
 
                 <ul className="space-y-3 mb-6">
