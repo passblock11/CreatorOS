@@ -1,12 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { authAPI, snapchatAPI, stripeAPI } from '@/lib/api';
 import { FiUser, FiCreditCard, FiLink } from 'react-icons/fi';
 
-export default function SettingsPage() {
+function SettingsContent() {
+  const searchParams = useSearchParams();
   const [user, setUser] = useState<any>(null);
   const [snapchatStatus, setSnapchatStatus] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -16,8 +18,19 @@ export default function SettingsPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    const snapchatParam = searchParams.get('snapchat');
+    const messageParam = searchParams.get('message');
+    
+    if (snapchatParam === 'connected') {
+      setSuccess('Snapchat account connected successfully!');
+      setTimeout(() => setSuccess(''), 5000);
+    } else if (snapchatParam === 'error') {
+      setError(`Failed to connect Snapchat: ${messageParam || 'Unknown error'}`);
+      setTimeout(() => setError(''), 5000);
+    }
+    
     fetchData();
-  }, []);
+  }, [searchParams]);
 
   const fetchData = async () => {
     try {
@@ -216,5 +229,19 @@ export default function SettingsPage() {
         </div>
       </div>
     </ProtectedRoute>
+  );
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense fallback={
+      <ProtectedRoute>
+        <div className="min-h-screen flex items-center justify-center">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
+      </ProtectedRoute>
+    }>
+      <SettingsContent />
+    </Suspense>
   );
 }
