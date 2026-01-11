@@ -1,0 +1,134 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Navbar from '@/components/Navbar';
+import { stripeAPI } from '@/lib/api';
+import { isAuthenticated } from '@/lib/auth';
+import { FiCheck } from 'react-icons/fi';
+
+export default function PricingPage() {
+  const router = useRouter();
+  const [plans, setPlans] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [subscribing, setSubscribing] = useState<string | null>(null);
+  const authenticated = isAuthenticated();
+
+  useEffect(() => {
+    fetchPlans();
+  }, []);
+
+  const fetchPlans = async () => {
+    try {
+      const response = await stripeAPI.getPlans();
+      setPlans(response.data.plans);
+    } catch (error) {
+      console.error('Error fetching plans:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubscribe = async (planId: string) => {
+    if (!authenticated) {
+      router.push('/register');
+      return;
+    }
+
+    if (planId === 'free') {
+      return;
+    }
+
+    setSubscribing(planId);
+
+    try {
+      const response = await stripeAPI.createCheckout(planId);
+      window.location.href = response.data.url;
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Error creating checkout');
+      setSubscribing(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-base-200">
+      {authenticated && <Navbar />}
+
+      <div className="container mx-auto p-6">
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold mb-4">Choose Your Plan</h1>
+          <p className="text-xl opacity-70">
+            Select the perfect plan for your content creation needs
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {plans.map((plan) => (
+            <div
+              key={plan.id}
+              className={`card bg-base-100 shadow-xl ${
+                plan.id === 'pro' ? 'border-2 border-primary' : ''
+              }`}
+            >
+              {plan.id === 'pro' && (
+                <div className="badge badge-primary absolute right-4 top-4">Most Popular</div>
+              )}
+              <div className="card-body">
+                <h2 className="card-title text-2xl">{plan.name}</h2>
+                <div className="my-4">
+                  <span className="text-5xl font-bold">${plan.price}</span>
+                  <span className="opacity-70">/{plan.interval}</span>
+                </div>
+
+                <ul className="space-y-3 mb-6">
+                  {plan.features.map((feature: string, index: number) => (
+                    <li key={index} className="flex items-center gap-2">
+                      <FiCheck className="text-success" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <button
+                  className={`btn ${plan.id === 'pro' ? 'btn-primary' : 'btn-outline'} ${
+                    subscribing === plan.id ? 'btn-disabled' : ''
+                  }`}
+                  onClick={() => handleSubscribe(plan.id)}
+                  disabled={subscribing === plan.id || (plan.id === 'free' && authenticated)}
+                >
+                  {subscribing === plan.id ? (
+                    <span className="loading loading-spinner"></span>
+                  ) : plan.id === 'free' ? (
+                    authenticated ? 'Current Plan' : 'Get Started'
+                  ) : (
+                    'Subscribe'
+                  )}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="text-center mt-12 max-w-2xl mx-auto">
+          <div className="card bg-base-100 shadow-xl">
+            <div className="card-body">
+              <h3 className="card-title">Need a custom solution?</h3>
+              <p>Contact us for enterprise pricing and custom features tailored to your needs.</p>
+              <div className="card-actions justify-center">
+                <button className="btn btn-outline">Contact Sales</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
