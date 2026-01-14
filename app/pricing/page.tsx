@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import { stripeAPI } from '@/lib/api';
 import { isAuthenticated } from '@/lib/auth';
 import { FiCheck } from 'react-icons/fi';
@@ -142,6 +143,8 @@ export default function PricingPage() {
           </div>
         </div>
       </div>
+      
+      <Footer />
     </div>
   );
 }

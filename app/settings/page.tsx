@@ -4,13 +4,14 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import { authAPI, snapchatAPI, stripeAPI } from '@/lib/api';
+import { authAPI, snapchatAPI, instagramAPI, stripeAPI } from '@/lib/api';
 import { FiUser, FiCreditCard, FiLink } from 'react-icons/fi';
 
 function SettingsContent() {
   const searchParams = useSearchParams();
   const [user, setUser] = useState<any>(null);
   const [snapchatStatus, setSnapchatStatus] = useState<any>(null);
+  const [instagramStatus, setInstagramStatus] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [name, setName] = useState('');
@@ -19,13 +20,22 @@ function SettingsContent() {
 
   useEffect(() => {
     const snapchatParam = searchParams.get('snapchat');
+    const instagramParam = searchParams.get('instagram');
     const messageParam = searchParams.get('message');
     
-    if (snapchatParam === 'connected') {
+    if (snapchatParam === 'connected' || snapchatParam === 'success') {
       setSuccess('Snapchat account connected successfully!');
       setTimeout(() => setSuccess(''), 5000);
     } else if (snapchatParam === 'error') {
       setError(`Failed to connect Snapchat: ${messageParam || 'Unknown error'}`);
+      setTimeout(() => setError(''), 5000);
+    }
+    
+    if (instagramParam === 'success') {
+      setSuccess('Instagram account connected successfully!');
+      setTimeout(() => setSuccess(''), 5000);
+    } else if (instagramParam === 'error') {
+      setError(`Failed to connect Instagram: ${messageParam || 'Unknown error'}`);
       setTimeout(() => setError(''), 5000);
     }
     
@@ -34,14 +44,16 @@ function SettingsContent() {
 
   const fetchData = async () => {
     try {
-      const [userRes, snapchatRes] = await Promise.all([
+      const [userRes, snapchatRes, instagramRes] = await Promise.all([
         authAPI.getMe(),
         snapchatAPI.getStatus(),
+        instagramAPI.getStatus(),
       ]);
 
       setUser(userRes.data.user);
       setName(userRes.data.user.name);
       setSnapchatStatus(snapchatRes.data);
+      setInstagramStatus(instagramRes.data);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -79,6 +91,24 @@ function SettingsContent() {
     try {
       await snapchatAPI.disconnect();
       setSnapchatStatus({ isConnected: false });
+    } catch (error) {
+      console.error('Error disconnecting:', error);
+    }
+  };
+
+  const handleConnectInstagram = async () => {
+    try {
+      const response = await instagramAPI.getAuthURL();
+      window.location.href = response.data.authUrl;
+    } catch (error) {
+      console.error('Error getting auth URL:', error);
+    }
+  };
+
+  const handleDisconnectInstagram = async () => {
+    try {
+      await instagramAPI.disconnect();
+      setInstagramStatus({ isConnected: false });
     } catch (error) {
       console.error('Error disconnecting:', error);
     }
@@ -178,23 +208,56 @@ function SettingsContent() {
             <div className="card bg-base-100 shadow-xl">
               <div className="card-body">
                 <h2 className="card-title">
-                  <FiLink /> Snapchat Integration
+                  <FiLink /> Social Media Integrations
                 </h2>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold">Snapchat Account</p>
-                    <p className="text-sm opacity-70">
-                      {snapchatStatus?.isConnected
-                        ? 'Your Snapchat account is connected'
-                        : 'Connect your Snapchat account to publish posts'}
-                    </p>
+                
+                {/* Snapchat */}
+                <div className="flex items-center justify-between py-3 border-b border-base-300">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center text-2xl">
+                      👻
+                    </div>
+                    <div>
+                      <p className="font-semibold">Snapchat</p>
+                      <p className="text-sm opacity-70">
+                        {snapchatStatus?.isConnected
+                          ? 'Connected'
+                          : 'Connect your Snapchat account'}
+                      </p>
+                    </div>
                   </div>
                   {snapchatStatus?.isConnected ? (
-                    <button className="btn btn-error btn-outline" onClick={handleDisconnectSnapchat}>
+                    <button className="btn btn-error btn-sm btn-outline" onClick={handleDisconnectSnapchat}>
                       Disconnect
                     </button>
                   ) : (
-                    <button className="btn btn-primary" onClick={handleConnectSnapchat}>
+                    <button className="btn btn-primary btn-sm" onClick={handleConnectSnapchat}>
+                      Connect
+                    </button>
+                  )}
+                </div>
+
+                {/* Instagram */}
+                <div className="flex items-center justify-between py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 rounded-lg flex items-center justify-center text-2xl">
+                      📷
+                    </div>
+                    <div>
+                      <p className="font-semibold">Instagram</p>
+                      <p className="text-sm opacity-70">
+                        {instagramStatus?.isConnected
+                          ? `@${instagramStatus.account?.username} - ${instagramStatus.account?.pageName}`
+                          : 'Connect your Instagram Business account'}
+                      </p>
+                    </div>
+                  </div>
+                  {instagramStatus?.isConnected ? (
+                    <button className="btn btn-error btn-sm btn-outline" onClick={handleDisconnectInstagram}>
+                      Disconnect
+                    </button>
+                  ) : (
+                    <button className="btn btn-primary btn-sm" onClick={handleConnectInstagram}>
                       Connect
                     </button>
                   )}

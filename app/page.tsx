@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { FiZap, FiTrendingUp, FiShield, FiClock } from 'react-icons/fi';
 import { isAuthenticated } from '@/lib/auth';
+import Footer from '@/components/Footer';
 
 export default function Home() {
   const router = useRouter();
@@ -43,7 +44,7 @@ export default function Home() {
             </h1>
             <p className="text-xl md:text-2xl mb-8 opacity-80">
               The all-in-one platform for creators to manage, schedule, and publish content to
-              Snapchat with powerful analytics.
+              Snapchat and Instagram with powerful analytics.
             </p>
             <div className="flex gap-4 justify-center">
               <Link href="/register" className="btn btn-primary btn-lg">
@@ -63,8 +64,8 @@ export default function Home() {
           <div className="card bg-base-100 shadow-xl">
             <div className="card-body items-center text-center">
               <FiZap className="text-5xl text-primary mb-4" />
-              <h3 className="card-title">Lightning Fast</h3>
-              <p>Publish content to Snapchat in seconds with our streamlined workflow.</p>
+              <h3 className="card-title">Multi-Platform</h3>
+              <p>Publish to Snapchat and Instagram simultaneously with one click.</p>
             </div>
           </div>
 
@@ -94,14 +95,7 @@ export default function Home() {
         </div>
       </div>
 
-      <footer className="footer footer-center p-10 bg-base-200 text-base-content">
-        <div>
-          <p className="font-bold text-lg">
-            <span className="text-primary">Creator</span>OS
-          </p>
-          <p>Copyright © 2024 - All rights reserved</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

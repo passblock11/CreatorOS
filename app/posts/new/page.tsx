@@ -15,6 +15,7 @@ export default function NewPostPage() {
     content: '',
     mediaUrl: '',
     mediaType: 'none',
+    platform: 'snapchat',
     scheduledFor: '',
   });
   const [loading, setLoading] = useState(false);
@@ -92,6 +93,24 @@ export default function NewPostPage() {
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                   required
                 ></textarea>
+              </div>
+
+              <div className="form-control mt-4">
+                <label className="label">
+                  <span className="label-text">Platform</span>
+                </label>
+                <select
+                  className="select select-bordered"
+                  value={formData.platform}
+                  onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
+                >
+                  <option value="snapchat">👻 Snapchat</option>
+                  <option value="instagram">📷 Instagram</option>
+                  <option value="both">🚀 Both Platforms</option>
+                </select>
+                <label className="label">
+                  <span className="label-text-alt">Select where to publish this post</span>
+                </label>
               </div>
 
               <div className="form-control mt-4">

@@ -16,6 +16,7 @@ export default function EditPostPage() {
     content: '',
     mediaUrl: '',
     mediaType: 'none',
+    platform: 'snapchat',
     scheduledFor: '',
   });
   const [loading, setLoading] = useState(true);
@@ -36,6 +37,7 @@ export default function EditPostPage() {
         content: post.content,
         mediaUrl: post.mediaUrl || '',
         mediaType: post.mediaType || 'none',
+        platform: post.platform || 'snapchat',
         scheduledFor: post.scheduledFor ? new Date(post.scheduledFor).toISOString().slice(0, 16) : '',
       });
     } catch (error) {
@@ -123,6 +125,21 @@ export default function EditPostPage() {
                     onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                     required
                   ></textarea>
+                </div>
+
+                <div className="form-control mt-4">
+                  <label className="label">
+                    <span className="label-text">Platform</span>
+                  </label>
+                  <select
+                    className="select select-bordered"
+                    value={formData.platform}
+                    onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
+                  >
+                    <option value="snapchat">👻 Snapchat</option>
+                    <option value="instagram">📷 Instagram</option>
+                    <option value="both">🚀 Both Platforms</option>
+                  </select>
                 </div>
 
                 <div className="form-control mt-4">

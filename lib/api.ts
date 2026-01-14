@@ -71,6 +71,14 @@ export const snapchatAPI = {
   getStatus: () => api.get('/snapchat/status'),
 };
 
+export const instagramAPI = {
+  getAuthURL: () => api.get('/instagram/connect'),
+  
+  disconnect: () => api.post('/instagram/disconnect'),
+  
+  getStatus: () => api.get('/instagram/status'),
+};
+
 export const stripeAPI = {
   getPlans: () => api.get('/stripe/plans'),
   
