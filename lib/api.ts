@@ -60,6 +60,8 @@ export const postsAPI = {
   
   publish: (id: string) => api.post(`/posts/${id}/publish`),
   
+  syncInstagramAnalytics: (id: string) => api.post(`/posts/${id}/sync-instagram-analytics`),
+  
   getAnalytics: () => api.get('/posts/analytics'),
 };
 
@@ -87,6 +89,21 @@ export const stripeAPI = {
   createPortalSession: () => api.post('/stripe/create-portal-session'),
   
   cancelSubscription: () => api.post('/stripe/cancel-subscription'),
+};
+
+export const uploadAPI = {
+  uploadMedia: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/upload/media', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+  
+  deleteMedia: (publicId: string, resourceType: string = 'image') =>
+    api.delete('/upload/media', { data: { publicId, resourceType } }),
 };
 
 export const adminAPI = {

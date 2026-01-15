@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { postsAPI } from '@/lib/api';
-import { FiPlus, FiEdit, FiTrash2, FiSend, FiClock, FiCheckCircle } from 'react-icons/fi';
+import { FiPlus, FiEdit, FiTrash2, FiSend, FiClock, FiCheckCircle, FiRefreshCw } from 'react-icons/fi';
 import { format } from 'date-fns';
 
 export default function PostsPage() {
@@ -15,6 +15,7 @@ export default function PostsPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [syncingAnalytics, setSyncingAnalytics] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPosts();
@@ -48,6 +49,18 @@ export default function PostsPage() {
       fetchPosts();
     } catch (error: any) {
       alert(error.response?.data?.message || 'Error publishing post');
+    }
+  };
+
+  const handleSyncAnalytics = async (id: string) => {
+    try {
+      setSyncingAnalytics(id);
+      await postsAPI.syncInstagramAnalytics(id);
+      fetchPosts();
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Error syncing analytics');
+    } finally {
+      setSyncingAnalytics(null);
     }
   };
 
@@ -159,13 +172,58 @@ export default function PostsPage() {
                           )}
                         </div>
                         {post.status === 'published' && (
-                          <div className="flex gap-4 mt-2">
-                            <span className="badge badge-outline">
-                              👁️ {post.analytics?.views || 0} views
-                            </span>
-                            <span className="badge badge-outline">
-                              📊 {post.analytics?.impressions || 0} impressions
-                            </span>
+                          <div className="mt-3">
+                            {post.instagramPostId && (
+                              <>
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span className="text-sm font-semibold">📷 Instagram Analytics</span>
+                                  <button
+                                    className={`btn btn-xs btn-ghost ${syncingAnalytics === post._id ? 'loading' : ''}`}
+                                    onClick={() => handleSyncAnalytics(post._id)}
+                                    disabled={syncingAnalytics === post._id}
+                                  >
+                                    {syncingAnalytics !== post._id && <FiRefreshCw />}
+                                    Sync
+                                  </button>
+                                  {post.analytics?.lastSynced && (
+                                    <span className="text-xs opacity-60">
+                                      Last synced: {format(new Date(post.analytics.lastSynced), 'MMM d, HH:mm')}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex gap-2 flex-wrap">
+                                  <span className="badge badge-outline">
+                                    ❤️ {post.analytics?.instagram?.likes || 0} likes
+                                  </span>
+                                  <span className="badge badge-outline">
+                                    💬 {post.analytics?.instagram?.comments || 0} comments
+                                  </span>
+                                  <span className="badge badge-outline">
+                                    🔖 {post.analytics?.instagram?.saves || 0} saves
+                                  </span>
+                                  <span className="badge badge-outline">
+                                    👁️ {post.analytics?.instagram?.impressions || 0} impressions
+                                  </span>
+                                  <span className="badge badge-outline">
+                                    📊 {post.analytics?.instagram?.reach || 0} reach
+                                  </span>
+                                  <span className="badge badge-outline">
+                                    ⚡ {post.analytics?.instagram?.engagement || 0} engagement
+                                  </span>
+                                </div>
+                              </>
+                            )}
+                            {post.snapchatPostId && !post.instagramPostId && (
+                              <div className="flex gap-2 flex-wrap">
+                                <span className="text-sm font-semibold">👻 Snapchat Analytics</span>
+                                <span className="badge badge-outline">
+                                  👁️ {post.analytics?.views || 0} views
+                                </span>
+                                <span className="badge badge-outline">
+                                  📊 {post.analytics?.impressions || 0} impressions
+                                </span>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
