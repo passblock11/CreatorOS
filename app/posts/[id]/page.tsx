@@ -22,6 +22,25 @@ export default function PostDetailsPage() {
     fetchPost();
   }, []);
 
+  // Check if analytics need syncing (older than 30 minutes)
+  const needsAnalyticsSync = 
+    post?.status === 'published' &&
+    post?.instagramPostId &&
+    (!post?.analytics?.lastSynced ||
+     Date.now() - new Date(post.analytics.lastSynced).getTime() > 30 * 60 * 1000);
+
+  useEffect(() => {
+    // Auto-trigger sync if needed and not already syncing
+    if (needsAnalyticsSync && !syncingAnalytics && post) {
+      const timer = setTimeout(() => {
+        console.log('🔄 Auto-syncing analytics...');
+        handleSyncAnalytics();
+      }, 2000); // Wait 2 seconds after page load
+
+      return () => clearTimeout(timer);
+    }
+  }, [needsAnalyticsSync, syncingAnalytics, post]);
+
   const fetchPost = async () => {
     try {
       const response = await postsAPI.getOne(params.id as string);
@@ -277,14 +296,25 @@ export default function PostDetailsPage() {
                       disabled={syncingAnalytics}
                     >
                       {!syncingAnalytics && <FiRefreshCw />}
-                      Sync
+                      {syncingAnalytics ? 'Syncing...' : 'Refresh Now'}
                     </button>
                   </div>
                   
                   {post.analytics?.lastSynced && (
                     <p className="text-sm opacity-60 mb-3">
                       Last synced: {format(new Date(post.analytics.lastSynced), 'MMM d, yyyy h:mm a')}
+                      {needsAnalyticsSync && (
+                        <span className="badge badge-warning badge-sm ml-2">Auto-syncing...</span>
+                      )}
                     </p>
+                  )}
+                  
+                  {!post.analytics?.lastSynced && (
+                    <div className="alert alert-info mb-3">
+                      <span className="text-sm">
+                        ℹ️ Analytics are being synced automatically. This may take a moment...
+                      </span>
+                    </div>
                   )}
 
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
