@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { postsAPI } from '@/lib/api';
-import { FiPlus, FiEdit, FiTrash2, FiSend, FiClock, FiCheckCircle, FiRefreshCw } from 'react-icons/fi';
+import { FiPlus, FiEdit, FiTrash2, FiSend, FiClock, FiCheckCircle, FiRefreshCw, FiEye } from 'react-icons/fi';
 import { format } from 'date-fns';
 
 export default function PostsPage() {
@@ -152,7 +152,9 @@ export default function PostsPage() {
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <h2 className="card-title">{post.title}</h2>
+                          <Link href={`/posts/${post._id}`} className="card-title hover:link">
+                            {post.title}
+                          </Link>
                           <div className={getStatusBadge(post.status)}>
                             {getStatusIcon(post.status)} {post.status}
                           </div>
@@ -228,17 +230,26 @@ export default function PostsPage() {
                         )}
                       </div>
                       <div className="flex gap-2">
+                        <button
+                          className="btn btn-sm btn-ghost"
+                          onClick={() => router.push(`/posts/${post._id}`)}
+                          title="View Details"
+                        >
+                          <FiEye />
+                        </button>
                         {post.status !== 'published' && (
                           <>
                             <button
                               className="btn btn-sm btn-outline"
                               onClick={() => router.push(`/posts/edit/${post._id}`)}
+                              title="Edit Post"
                             >
                               <FiEdit />
                             </button>
                             <button
                               className="btn btn-sm btn-primary"
                               onClick={() => handlePublish(post._id)}
+                              title="Publish Now"
                             >
                               <FiSend /> Publish
                             </button>
@@ -247,6 +258,7 @@ export default function PostsPage() {
                         <button
                           className="btn btn-sm btn-error btn-outline"
                           onClick={() => setDeleteId(post._id)}
+                          title="Delete Post"
                         >
                           <FiTrash2 />
                         </button>
