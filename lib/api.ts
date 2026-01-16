@@ -120,4 +120,36 @@ export const adminAPI = {
   getApiLogs: (params?: any) => api.get('/admin/logs', { params }),
 };
 
+export const aiAPI = {
+  generateContent: (data: {
+    title: string;
+    platform?: string;
+    options?: {
+      tone?: string;
+      length?: string;
+      includeHashtags?: boolean;
+      includeEmojis?: boolean;
+    };
+  }) => api.post('/ai/generate', data),
+  
+  generateVariations: (data: {
+    title: string;
+    platform?: string;
+    count?: number;
+    options?: any;
+  }) => api.post('/ai/variations', data),
+  
+  improveContent: (data: {
+    content: string;
+    platform?: string;
+    improvementType?: string;
+  }) => api.post('/ai/improve', data),
+  
+  generateHashtags: (data: {
+    content: string;
+    platform?: string;
+    count?: number;
+  }) => api.post('/ai/hashtags', data),
+};
+
 export default api;

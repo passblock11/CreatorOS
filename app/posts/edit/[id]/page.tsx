@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import { postsAPI } from '@/lib/api';
+import { postsAPI, aiAPI } from '@/lib/api';
 import { uploadMedia, formatFileSize, getUploadMethodDescription } from '@/lib/uploadHelper';
-import { FiSave, FiArrowLeft, FiUpload, FiX, FiImage, FiEye } from 'react-icons/fi';
+import { FiSave, FiArrowLeft, FiUpload, FiX, FiImage, FiEye, FiZap, FiRefreshCw } from 'react-icons/fi';
 import Link from 'next/link';
 
 export default function EditPostPage() {
@@ -27,6 +27,9 @@ export default function EditPostPage() {
   const [uploadProgress, setUploadProgress] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState('');
+  const [generatingAI, setGeneratingAI] = useState(false);
+  const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [aiGeneratedContent, setAiGeneratedContent] = useState('');
 
   useEffect(() => {
     fetchPost();
@@ -116,6 +119,46 @@ export default function EditPostPage() {
     }
   };
 
+  const handleGenerateAI = async () => {
+    if (!formData.title) {
+      setError('Please enter a title first');
+      return;
+    }
+
+    setGeneratingAI(true);
+    setError('');
+
+    try {
+      const response = await aiAPI.generateContent({
+        title: formData.title,
+        platform: formData.platform,
+        options: {
+          tone: 'engaging',
+          length: 'medium',
+          includeHashtags: true,
+          includeEmojis: true,
+        },
+      });
+
+      setAiGeneratedContent(response.data.data.content);
+      setAiModalOpen(true);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Error generating content');
+    } finally {
+      setGeneratingAI(false);
+    }
+  };
+
+  const handleUseAIContent = () => {
+    setFormData({ ...formData, content: aiGeneratedContent });
+    setAiModalOpen(false);
+  };
+
+  const handleRegenerateAI = async () => {
+    setAiModalOpen(false);
+    await handleGenerateAI();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -195,14 +238,32 @@ export default function EditPostPage() {
                 <div className="form-control mt-4">
                   <label className="label">
                     <span className="label-text">Content</span>
+                    {formData.title && (
+                      <button
+                        type="button"
+                        className={`btn btn-sm btn-primary ${generatingAI ? 'loading' : ''}`}
+                        onClick={handleGenerateAI}
+                        disabled={generatingAI || !formData.title}
+                      >
+                        {!generatingAI && <FiZap />}
+                        {generatingAI ? 'Generating...' : 'Regenerate with AI'}
+                      </button>
+                    )}
                   </label>
                   <textarea
                     className="textarea textarea-bordered h-32"
-                    placeholder="Enter your content"
+                    placeholder="Enter your content or use AI to generate it"
                     value={formData.content}
                     onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                     required
                   ></textarea>
+                  {!formData.title && (
+                    <label className="label">
+                      <span className="label-text-alt text-info">
+                        💡 Enter a title above to generate AI content
+                      </span>
+                    </label>
+                  )}
                 </div>
 
                 <div className="form-control mt-4">
@@ -358,6 +419,49 @@ export default function EditPostPage() {
             </div>
           </div>
         </div>
+
+        {/* AI Generated Content Modal */}
+        {aiModalOpen && (
+          <div className="modal modal-open">
+            <div className="modal-box max-w-2xl">
+              <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                <FiZap className="text-primary" /> AI Generated Content
+              </h3>
+              
+              <div className="bg-base-200 p-4 rounded-lg mb-4 max-h-96 overflow-y-auto">
+                <p className="whitespace-pre-wrap">{aiGeneratedContent}</p>
+              </div>
+
+              <div className="alert alert-info mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>You can edit this content after using it</span>
+              </div>
+
+              <div className="modal-action">
+                <button
+                  className="btn btn-ghost"
+                  onClick={() => setAiModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn btn-outline"
+                  onClick={handleRegenerateAI}
+                >
+                  <FiRefreshCw /> Regenerate
+                </button>
+                <button
+                  className="btn btn-primary"
+                  onClick={handleUseAIContent}
+                >
+                  Use This Content
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </ProtectedRoute>
   );
