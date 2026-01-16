@@ -6,8 +6,7 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { postsAPI } from '@/lib/api';
-import { FiPlus, FiEdit, FiTrash2, FiSend, FiClock, FiCheckCircle, FiRefreshCw, FiEye } from 'react-icons/fi';
-import { format } from 'date-fns';
+import { FiPlus, FiHeart, FiMessageCircle, FiBookmark, FiEye, FiEdit, FiTrash2, FiSend } from 'react-icons/fi';
 
 export default function PostsPage() {
   const router = useRouter();
@@ -15,7 +14,6 @@ export default function PostsPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [syncingAnalytics, setSyncingAnalytics] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPosts();
@@ -52,18 +50,6 @@ export default function PostsPage() {
     }
   };
 
-  const handleSyncAnalytics = async (id: string) => {
-    try {
-      setSyncingAnalytics(id);
-      await postsAPI.syncInstagramAnalytics(id);
-      fetchPosts();
-    } catch (error: any) {
-      alert(error.response?.data?.message || 'Error syncing analytics');
-    } finally {
-      setSyncingAnalytics(null);
-    }
-  };
-
   const getStatusBadge = (status: string) => {
     const badges: any = {
       draft: 'badge-warning',
@@ -71,17 +57,7 @@ export default function PostsPage() {
       published: 'badge-success',
       failed: 'badge-error',
     };
-    return `badge ${badges[status] || 'badge-ghost'}`;
-  };
-
-  const getStatusIcon = (status: string) => {
-    const icons: any = {
-      draft: <FiEdit />,
-      scheduled: <FiClock />,
-      published: <FiCheckCircle />,
-      failed: <FiTrash2 />,
-    };
-    return icons[status] || <FiEdit />;
+    return `badge ${badges[status] || 'badge-ghost'} badge-sm`;
   };
 
   if (loading) {
@@ -99,174 +75,215 @@ export default function PostsPage() {
       <div className="min-h-screen bg-base-200">
         <Navbar />
 
-        <div className="container mx-auto p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-4xl font-bold text-base-content">My Posts</h1>
-            <Link href="/posts/new" className="btn btn-primary">
+        <div className="container mx-auto p-6 max-w-7xl">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-4xl font-bold text-base-content mb-2">My Posts</h1>
+              <p className="text-base-content/70">
+                {posts.length} {posts.length === 1 ? 'post' : 'posts'}
+              </p>
+            </div>
+            <Link href="/posts/new" className="btn btn-primary gap-2">
               <FiPlus /> Create Post
             </Link>
           </div>
 
-          <div className="tabs tabs-boxed mb-6">
-            <a
-              className={`tab ${filter === 'all' ? 'tab-active' : ''}`}
+          {/* Filter Tabs */}
+          <div className="flex gap-2 mb-8 overflow-x-auto">
+            <button
+              className={`btn btn-sm ${filter === 'all' ? 'btn-primary' : 'btn-ghost'}`}
               onClick={() => setFilter('all')}
             >
               All
-            </a>
-            <a
-              className={`tab ${filter === 'draft' ? 'tab-active' : ''}`}
-              onClick={() => setFilter('draft')}
-            >
-              Drafts
-            </a>
-            <a
-              className={`tab ${filter === 'scheduled' ? 'tab-active' : ''}`}
-              onClick={() => setFilter('scheduled')}
-            >
-              Scheduled
-            </a>
-            <a
-              className={`tab ${filter === 'published' ? 'tab-active' : ''}`}
+            </button>
+            <button
+              className={`btn btn-sm ${filter === 'published' ? 'btn-primary' : 'btn-ghost'}`}
               onClick={() => setFilter('published')}
             >
               Published
-            </a>
+            </button>
+            <button
+              className={`btn btn-sm ${filter === 'draft' ? 'btn-primary' : 'btn-ghost'}`}
+              onClick={() => setFilter('draft')}
+            >
+              Drafts
+            </button>
+            <button
+              className={`btn btn-sm ${filter === 'scheduled' ? 'btn-primary' : 'btn-ghost'}`}
+              onClick={() => setFilter('scheduled')}
+            >
+              Scheduled
+            </button>
           </div>
 
+          {/* Posts Grid */}
           {posts.length === 0 ? (
             <div className="card bg-base-100 shadow-xl">
-              <div className="card-body items-center text-center">
-                <h2 className="card-title text-2xl mb-4">No posts found</h2>
-                <p className="mb-4">Create your first post to get started</p>
-                <Link href="/posts/new" className="btn btn-primary">
-                  <FiPlus /> Create Post
+              <div className="card-body items-center text-center py-16">
+                <div className="text-6xl mb-4">📸</div>
+                <h2 className="card-title text-2xl mb-2">No posts yet</h2>
+                <p className="text-base-content/70 mb-6">Start creating content to see it here</p>
+                <Link href="/posts/new" className="btn btn-primary gap-2">
+                  <FiPlus /> Create Your First Post
                 </Link>
               </div>
             </div>
           ) : (
-            <div className="grid gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {posts.map((post) => (
-                <div key={post._id} className="card bg-base-100 shadow-xl">
-                  <div className="card-body">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Link href={`/posts/${post._id}`} className="card-title hover:link">
-                            {post.title}
-                          </Link>
-                          <div className={getStatusBadge(post.status)}>
-                            {getStatusIcon(post.status)} {post.status}
-                          </div>
-                        </div>
-                        <p className="text-base-content/70 mb-2">{post.content.substring(0, 150)}...</p>
-                        <div className="flex gap-4 text-sm opacity-60">
-                          <span>Created: {format(new Date(post.createdAt), 'MMM d, yyyy')}</span>
-                          {post.scheduledFor && (
-                            <span>
-                              Scheduled: {format(new Date(post.scheduledFor), 'MMM d, yyyy HH:mm')}
-                            </span>
-                          )}
-                          {post.publishedAt && (
-                            <span>
-                              Published: {format(new Date(post.publishedAt), 'MMM d, yyyy')}
-                            </span>
-                          )}
-                        </div>
-                        {post.status === 'published' && (
-                          <div className="mt-3">
-                            {post.instagramPostId && (
-                              <>
-                                <div className="flex items-center gap-2 mb-2">
-                                  <span className="text-sm font-semibold">📷 Instagram Analytics</span>
-                                  <button
-                                    className={`btn btn-xs btn-ghost ${syncingAnalytics === post._id ? 'loading' : ''}`}
-                                    onClick={() => handleSyncAnalytics(post._id)}
-                                    disabled={syncingAnalytics === post._id}
-                                  >
-                                    {syncingAnalytics !== post._id && <FiRefreshCw />}
-                                    Sync
-                                  </button>
-                                  {post.analytics?.lastSynced && (
-                                    <span className="text-xs opacity-60">
-                                      Last synced: {format(new Date(post.analytics.lastSynced), 'MMM d, HH:mm')}
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="flex gap-2 flex-wrap">
-                                  <span className="badge badge-outline">
-                                    ❤️ {post.analytics?.instagram?.likes || 0} likes
-                                  </span>
-                                  <span className="badge badge-outline">
-                                    💬 {post.analytics?.instagram?.comments || 0} comments
-                                  </span>
-                                  <span className="badge badge-outline">
-                                    🔖 {post.analytics?.instagram?.saves || 0} saves
-                                  </span>
-                                  <span className="badge badge-outline">
-                                    👁️ {post.analytics?.instagram?.impressions || 0} impressions
-                                  </span>
-                                  <span className="badge badge-outline">
-                                    📊 {post.analytics?.instagram?.reach || 0} reach
-                                  </span>
-                                  <span className="badge badge-outline">
-                                    ⚡ {post.analytics?.instagram?.engagement || 0} engagement
-                                  </span>
-                                </div>
-                              </>
-                            )}
-                            {post.snapchatPostId && !post.instagramPostId && (
-                              <div className="flex gap-2 flex-wrap">
-                                <span className="text-sm font-semibold">👻 Snapchat Analytics</span>
-                                <span className="badge badge-outline">
-                                  👁️ {post.analytics?.views || 0} views
-                                </span>
-                                <span className="badge badge-outline">
-                                  📊 {post.analytics?.impressions || 0} impressions
-                                </span>
-                              </div>
-                            )}
-                          </div>
+                <div
+                  key={post._id}
+                  className="group relative bg-base-100 rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer"
+                  onClick={() => router.push(`/posts/${post._id}`)}
+                >
+                  {/* Image/Video Preview */}
+                  <div className="relative aspect-square bg-base-300 overflow-hidden">
+                    {post.mediaUrl ? (
+                      <>
+                        {post.mediaType === 'video' ? (
+                          <video
+                            src={post.mediaUrl}
+                            className="w-full h-full object-cover"
+                            muted
+                          />
+                        ) : (
+                          <img
+                            src={post.mediaUrl}
+                            alt={post.title}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          />
                         )}
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
+                        <div className="text-center">
+                          <div className="text-6xl mb-2">📝</div>
+                          <p className="text-sm opacity-70">Text Post</p>
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        <button
-                          className="btn btn-sm btn-ghost"
-                          onClick={() => router.push(`/posts/${post._id}`)}
-                          title="View Details"
-                        >
-                          <FiEye />
-                        </button>
-                        {post.status !== 'published' && (
-                          <>
-                            <button
-                              className="btn btn-sm btn-outline"
-                              onClick={() => router.push(`/posts/edit/${post._id}`)}
-                              title="Edit Post"
-                            >
-                              <FiEdit />
-                            </button>
-                            <button
-                              className="btn btn-sm btn-primary"
-                              onClick={() => handlePublish(post._id)}
-                              title="Publish Now"
-                            >
-                              <FiSend /> Publish
-                            </button>
-                          </>
-                        )}
-                        <button
-                          className="btn btn-sm btn-error btn-outline"
-                          onClick={() => setDeleteId(post._id)}
-                          title="Delete Post"
-                        >
-                          <FiTrash2 />
-                        </button>
+                    )}
+
+                    {/* Status Badge */}
+                    <div className="absolute top-2 right-2">
+                      <div className={getStatusBadge(post.status)}>
+                        {post.status}
                       </div>
                     </div>
-                    {post.error && (
-                      <div className="alert alert-error mt-2">
-                        <span>Error: {post.error.message}</span>
+
+                    {/* Platform Badge */}
+                    <div className="absolute top-2 left-2">
+                      {post.platform === 'instagram' && (
+                        <div className="badge badge-primary badge-sm">📷 IG</div>
+                      )}
+                      {post.platform === 'snapchat' && (
+                        <div className="badge badge-accent badge-sm">👻 SC</div>
+                      )}
+                      {post.platform === 'both' && (
+                        <div className="badge badge-secondary badge-sm">🚀 Both</div>
+                      )}
+                    </div>
+
+                    {/* Hover Overlay */}
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                      <div className="text-white text-center px-4">
+                        {/* Stats */}
+                        {post.status === 'published' && post.instagramPostId && (
+                          <div className="flex gap-6 justify-center mb-4">
+                            <div className="flex items-center gap-2">
+                              <FiHeart className="w-5 h-5" />
+                              <span className="font-semibold">
+                                {post.analytics?.instagram?.likes || 0}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <FiMessageCircle className="w-5 h-5" />
+                              <span className="font-semibold">
+                                {post.analytics?.instagram?.comments || 0}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <FiBookmark className="w-5 h-5" />
+                              <span className="font-semibold">
+                                {post.analytics?.instagram?.saves || 0}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-2 justify-center">
+                          <button
+                            className="btn btn-sm btn-circle btn-ghost bg-white/20 hover:bg-white/30"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/posts/${post._id}`);
+                            }}
+                            title="View"
+                          >
+                            <FiEye className="w-4 h-4" />
+                          </button>
+                          {post.status !== 'published' && (
+                            <>
+                              <button
+                                className="btn btn-sm btn-circle btn-ghost bg-white/20 hover:bg-white/30"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  router.push(`/posts/edit/${post._id}`);
+                                }}
+                                title="Edit"
+                              >
+                                <FiEdit className="w-4 h-4" />
+                              </button>
+                              <button
+                                className="btn btn-sm btn-circle btn-primary"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handlePublish(post._id);
+                                }}
+                                title="Publish"
+                              >
+                                <FiSend className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
+                          <button
+                            className="btn btn-sm btn-circle btn-error"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteId(post._id);
+                            }}
+                            title="Delete"
+                          >
+                            <FiTrash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Post Info */}
+                  <div className="p-4">
+                    <h3 className="font-bold text-base-content truncate mb-1">
+                      {post.title}
+                    </h3>
+                    <p className="text-sm text-base-content/70 line-clamp-2 mb-2">
+                      {post.content}
+                    </p>
+                    
+                    {/* Additional Info */}
+                    {post.status === 'published' && post.instagramPostId && (
+                      <div className="flex gap-3 text-xs text-base-content/60 mt-2">
+                        <span className="flex items-center gap-1">
+                          <FiEye className="w-3 h-3" />
+                          {post.analytics?.instagram?.impressions || 0}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          📊 {post.analytics?.instagram?.reach || 0}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          ⚡ {post.analytics?.instagram?.engagement || 0}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -275,17 +292,21 @@ export default function PostsPage() {
             </div>
           )}
 
+          {/* Delete Confirmation Modal */}
           {deleteId && (
             <div className="modal modal-open">
               <div className="modal-box">
                 <h3 className="font-bold text-lg">Delete Post</h3>
-                <p className="py-4">Are you sure you want to delete this post? This action cannot be undone.</p>
+                <p className="py-4">
+                  Are you sure you want to delete this post? This action cannot be undone and will also
+                  remove it from the platform if published.
+                </p>
                 <div className="modal-action">
-                  <button className="btn" onClick={() => setDeleteId(null)}>
+                  <button className="btn btn-ghost" onClick={() => setDeleteId(null)}>
                     Cancel
                   </button>
                   <button className="btn btn-error" onClick={() => handleDelete(deleteId)}>
-                    Delete
+                    Delete Permanently
                   </button>
                 </div>
               </div>
