@@ -101,10 +101,10 @@ function DashboardContent() {
           )}
 
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">
+            <h1 className="text-4xl font-bold mb-2 text-base-content">
               Welcome back, {user?.name}! 👋
             </h1>
-            <p className="text-lg opacity-70">Here's what's happening with your content</p>
+            <p className="text-lg text-base-content/70">Here's what's happening with your content</p>
           </div>
 
           {(!snapchatStatus?.isConnected || !instagramStatus?.isConnected) && (
@@ -200,7 +200,7 @@ function DashboardContent() {
                   <div className="badge badge-primary badge-lg mb-2">
                     {user?.subscription?.plan?.toUpperCase()}
                   </div>
-                  <p className="text-sm opacity-70 mb-4">
+                  <p className="text-sm text-base-content/70 mb-4">
                     {analytics?.postsThisMonth || 0} / {analytics?.planLimits?.postsPerMonth === -1 ? '∞' : analytics?.planLimits?.postsPerMonth} posts this month
                   </p>
                   {analytics?.planLimits?.postsPerMonth !== -1 && (
@@ -228,19 +228,19 @@ function DashboardContent() {
                   <div className={`badge ${snapchatStatus?.isConnected ? 'badge-success' : 'badge-error'}`}>
                     {snapchatStatus?.isConnected ? 'Connected' : 'Not Connected'}
                   </div>
-                  <span>Snapchat Account</span>
+                  <span className="text-base-content">Snapchat Account</span>
                 </div>
                 <div className="flex items-center gap-3 p-4 bg-base-200 rounded-lg">
                   <div className={`badge ${instagramStatus?.isConnected ? 'badge-success' : 'badge-error'}`}>
                     {instagramStatus?.isConnected ? 'Connected' : 'Not Connected'}
                   </div>
-                  <span>Instagram Account</span>
+                  <span className="text-base-content">Instagram Account</span>
                 </div>
                 <div className="flex items-center gap-3 p-4 bg-base-200 rounded-lg">
                   <div className={`badge ${user?.subscription?.status === 'active' ? 'badge-success' : 'badge-warning'}`}>
                     {user?.subscription?.status}
                   </div>
-                  <span>Subscription</span>
+                  <span className="text-base-content">Subscription</span>
                 </div>
               </div>
             </div>
