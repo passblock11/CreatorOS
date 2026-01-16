@@ -126,11 +126,19 @@ const uploadDirectToCloudinary = async (
 
   console.log('✅ Uploaded to Cloudinary:', uploadResponse.data);
 
-  // Step 3: Verify upload with backend
+  // Step 3: Verify upload with backend (pass Cloudinary's response data)
+  const cloudinaryData = uploadResponse.data;
   const verifyResponse = await axios.post(
     `${API_URL}/upload/verify`,
     {
-      publicId: uploadResponse.data.public_id,
+      publicId: cloudinaryData.public_id,
+      url: cloudinaryData.secure_url,
+      format: cloudinaryData.format,
+      width: cloudinaryData.width,
+      height: cloudinaryData.height,
+      bytes: cloudinaryData.bytes,
+      resourceType: cloudinaryData.resource_type,
+      createdAt: cloudinaryData.created_at,
     },
     {
       headers: {
