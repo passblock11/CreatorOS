@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import { postsAPI, uploadAPI } from '@/lib/api';
+import { postsAPI } from '@/lib/api';
+import { uploadMedia, formatFileSize, getUploadMethodDescription } from '@/lib/uploadHelper';
 import { FiSave, FiSend, FiArrowLeft, FiUpload, FiX, FiImage } from 'react-icons/fi';
 import Link from 'next/link';
 
@@ -72,15 +73,16 @@ export default function NewPostPage() {
     setError('');
 
     try {
-      const response = await uploadAPI.uploadMedia(selectedFile);
-      const uploadedUrl = response.data.data.url;
+      const result = await uploadMedia(selectedFile, (progress) => {
+        setUploadProgress(`Uploading... ${progress}%`);
+      });
       
-      setFormData({ ...formData, mediaUrl: uploadedUrl });
+      setFormData({ ...formData, mediaUrl: result.url });
       setUploadProgress('Upload complete!');
       
       setTimeout(() => setUploadProgress(''), 2000);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error uploading file');
+      setError(err.message || 'Error uploading file');
       setUploadProgress('');
     } finally {
       setUploadingFile(false);

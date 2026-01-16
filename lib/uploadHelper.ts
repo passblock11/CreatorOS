@@ -1,8 +1,8 @@
 import { uploadAPI } from './api';
 import axios from 'axios';
 
-const VERCEL_SAFE_SIZE = 10 * 1024 * 1024; // 10MB - safe limit for Vercel
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB - maximum allowed
+const VERCEL_SAFE_SIZE = 4 * 1024 * 1024; // 4MB - safe limit for Vercel Hobby plan
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB - maximum allowed
 
 export interface UploadResult {
   url: string;
@@ -18,8 +18,8 @@ export interface UploadResult {
 
 /**
  * Upload file - automatically chooses best method based on file size
- * - Small files (< 10MB): Upload through backend
- * - Large files (> 10MB): Direct upload to Cloudinary
+ * - Small files (< 4MB): Upload through backend
+ * - Large files (> 4MB): Direct upload to Cloudinary
  */
 export const uploadMedia = async (
   file: File,
@@ -52,10 +52,10 @@ export const uploadMedia = async (
 
     // Choose upload method based on file size
     if (file.size <= VERCEL_SAFE_SIZE) {
-      console.log('📤 Using backend upload (file < 10MB)');
+      console.log('📤 Using backend upload (file < 4MB)');
       return await uploadViaBackend(file, onProgress);
     } else {
-      console.log('📤 Using direct Cloudinary upload (file > 10MB)');
+      console.log('📤 Using direct Cloudinary upload (file > 4MB)');
       return await uploadDirectToCloudinary(file, onProgress);
     }
   } catch (error: any) {
