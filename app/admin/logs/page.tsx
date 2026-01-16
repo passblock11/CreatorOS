@@ -48,7 +48,7 @@ export default function AdminLogsPage() {
         <Navbar />
 
         <div className="container mx-auto p-6">
-          <h1 className="text-4xl font-bold mb-8">API Logs</h1>
+          <h1 className="text-4xl font-bold mb-8 text-base-content">API Logs</h1>
 
           <div className="card bg-base-100 shadow-xl mb-6">
             <div className="card-body">
@@ -128,7 +128,7 @@ export default function AdminLogsPage() {
               </div>
 
               {logs.length === 0 && (
-                <div className="text-center py-8 opacity-70">No logs found</div>
+                <div className="text-center py-8 text-base-content/70">No logs found</div>
               )}
             </div>
           </div>

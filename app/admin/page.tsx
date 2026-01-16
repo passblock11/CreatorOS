@@ -44,7 +44,7 @@ export default function AdminPage() {
         <Navbar />
 
         <div className="container mx-auto p-6">
-          <h1 className="text-4xl font-bold mb-8">Admin Dashboard</h1>
+          <h1 className="text-4xl font-bold mb-8 text-base-content">Admin Dashboard</h1>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatCard
@@ -136,7 +136,7 @@ export default function AdminPage() {
                       {stats?.recentUsers?.map((user: any) => (
                         <tr key={user._id}>
                           <td>{user.name}</td>
-                          <td className="text-sm opacity-70">{user.email}</td>
+                          <td className="text-sm text-base-content/70">{user.email}</td>
                           <td>
                             <span className="badge badge-sm badge-primary">
                               {user.subscription.plan}

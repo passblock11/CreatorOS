@@ -37,12 +37,12 @@ export default function Home() {
       <div className="hero min-h-[80vh]">
         <div className="hero-content text-center">
           <div className="max-w-3xl">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6">
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-base-content">
               Manage Your Content,
               <br />
               <span className="text-primary">Amplify Your Reach</span>
             </h1>
-            <p className="text-xl md:text-2xl mb-8 opacity-80">
+            <p className="text-xl md:text-2xl mb-8 text-base-content/80">
               The all-in-one platform for creators to manage, schedule, and publish content to
               Snapchat and Instagram with powerful analytics.
             </p>
@@ -59,7 +59,7 @@ export default function Home() {
       </div>
 
       <div className="container mx-auto px-4 py-20">
-        <h2 className="text-4xl font-bold text-center mb-16">Why Creator OS?</h2>
+        <h2 className="text-4xl font-bold text-center mb-16 text-base-content">Why Creator OS?</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="card bg-base-100 shadow-xl">
             <div className="card-body items-center text-center">

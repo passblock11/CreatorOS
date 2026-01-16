@@ -74,7 +74,7 @@ export default function AdminUsersPage() {
         <Navbar />
 
         <div className="container mx-auto p-6">
-          <h1 className="text-4xl font-bold mb-8">User Management</h1>
+          <h1 className="text-4xl font-bold mb-8 text-base-content">User Management</h1>
 
           <div className="card bg-base-100 shadow-xl mb-6">
             <div className="card-body">
@@ -127,7 +127,7 @@ export default function AdminUsersPage() {
                     {users.map((user) => (
                       <tr key={user._id}>
                         <td className="font-semibold">{user.name}</td>
-                        <td className="text-sm opacity-70">{user.email}</td>
+                        <td className="text-sm text-base-content/70">{user.email}</td>
                         <td>
                           <span
                             className={`badge ${
@@ -178,7 +178,7 @@ export default function AdminUsersPage() {
               </div>
 
               {users.length === 0 && (
-                <div className="text-center py-8 opacity-70">No users found</div>
+                <div className="text-center py-8 text-base-content/70">No users found</div>
               )}
             </div>
           </div>

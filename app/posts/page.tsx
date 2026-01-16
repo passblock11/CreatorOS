@@ -101,7 +101,7 @@ export default function PostsPage() {
 
         <div className="container mx-auto p-6">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-4xl font-bold">My Posts</h1>
+            <h1 className="text-4xl font-bold text-base-content">My Posts</h1>
             <Link href="/posts/new" className="btn btn-primary">
               <FiPlus /> Create Post
             </Link>
@@ -159,7 +159,7 @@ export default function PostsPage() {
                             {getStatusIcon(post.status)} {post.status}
                           </div>
                         </div>
-                        <p className="opacity-70 mb-2">{post.content.substring(0, 150)}...</p>
+                        <p className="text-base-content/70 mb-2">{post.content.substring(0, 150)}...</p>
                         <div className="flex gap-4 text-sm opacity-60">
                           <span>Created: {format(new Date(post.createdAt), 'MMM d, yyyy')}</span>
                           {post.scheduledFor && (

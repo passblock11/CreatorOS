@@ -148,7 +148,7 @@ export default function PostDetailsPage() {
               {/* Header with Title and Actions */}
               <div className="flex justify-between items-start mb-4">
                 <div className="flex-1">
-                  <h1 className="text-4xl font-bold mb-2">{post.title}</h1>
+                  <h1 className="text-4xl font-bold mb-2 text-base-content">{post.title}</h1>
                   <div className="flex gap-2 flex-wrap items-center">
                     <div className={`badge ${getStatusColor(post.status)}`}>
                       {post.status}
@@ -375,7 +375,7 @@ export default function PostDetailsPage() {
                   <div>
                     <h3 className="font-bold">Publishing Error</h3>
                     <p className="text-sm">{post.error.message}</p>
-                    <p className="text-xs opacity-70">
+                    <p className="text-xs text-base-content/70">
                       {format(new Date(post.error.timestamp), 'MMM d, yyyy h:mm a')}
                     </p>
                   </div>

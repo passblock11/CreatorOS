@@ -65,8 +65,8 @@ export default function PricingPage() {
 
       <div className="container mx-auto p-6">
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold mb-4">Choose Your Plan</h1>
-          <p className="text-xl opacity-70">
+          <h1 className="text-5xl font-bold mb-4 text-base-content">Choose Your Plan</h1>
+          <p className="text-xl text-base-content/70">
             Select the perfect plan for your content creation needs
           </p>
           <p className="text-sm opacity-60 mt-2">
@@ -91,13 +91,13 @@ export default function PricingPage() {
                   {plan.priceINR ? (
                     <>
                       <span className="text-5xl font-bold">₹{plan.priceINR.toLocaleString('en-IN')}</span>
-                      <span className="opacity-70">/{plan.interval}</span>
+                      <span className="text-base-content/70">/{plan.interval}</span>
                       <div className="text-sm opacity-60 mt-1">(≈ ${plan.price} USD)</div>
                     </>
                   ) : (
                     <>
                       <span className="text-5xl font-bold">Free</span>
-                      <span className="opacity-70">/{plan.interval}</span>
+                      <span className="text-base-content/70">/{plan.interval}</span>
                     </>
                   )}
                 </div>

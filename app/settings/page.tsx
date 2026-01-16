@@ -139,7 +139,7 @@ function SettingsContent() {
         <Navbar />
 
         <div className="container mx-auto p-6 max-w-4xl">
-          <h1 className="text-4xl font-bold mb-8">Settings</h1>
+          <h1 className="text-4xl font-bold mb-8 text-base-content">Settings</h1>
 
           {success && (
             <div className="alert alert-success mb-6">
@@ -219,7 +219,7 @@ function SettingsContent() {
                     </div>
                     <div>
                       <p className="font-semibold">Snapchat</p>
-                      <p className="text-sm opacity-70">
+                      <p className="text-sm text-base-content/70">
                         {snapchatStatus?.isConnected
                           ? 'Connected'
                           : 'Connect your Snapchat account'}
@@ -245,7 +245,7 @@ function SettingsContent() {
                     </div>
                     <div>
                       <p className="font-semibold">Instagram</p>
-                      <p className="text-sm opacity-70">
+                      <p className="text-sm text-base-content/70">
                         {instagramStatus?.isConnected
                           ? `@${instagramStatus.account?.username} - ${instagramStatus.account?.pageName}`
                           : 'Connect your Instagram Business account'}
@@ -278,7 +278,7 @@ function SettingsContent() {
                         {user?.subscription?.plan?.toUpperCase()}
                       </span>
                     </p>
-                    <p className="text-sm opacity-70 mt-1">
+                    <p className="text-sm text-base-content/70 mt-1">
                       Status: {user?.subscription?.status}
                     </p>
                   </div>

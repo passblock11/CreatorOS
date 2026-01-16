@@ -14,8 +14,8 @@ export default function PrivacyPolicyPage() {
       <div className="container mx-auto px-6 py-12 max-w-4xl">
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body prose max-w-none">
-            <h1 className="text-4xl font-bold mb-2">Privacy Policy</h1>
-            <p className="text-sm opacity-70 mb-6">
+            <h1 className="text-4xl font-bold mb-2 text-base-content">Privacy Policy</h1>
+            <p className="text-sm text-base-content/70 mb-6">
               Last Updated: January 14, 2026
             </p>
 
