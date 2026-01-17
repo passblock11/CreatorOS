@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import { postsAPI } from '@/lib/api';
-import { FiArrowLeft, FiEdit, FiSend, FiTrash2, FiRefreshCw, FiExternalLink } from 'react-icons/fi';
+import { postsAPI, youtubeAPI } from '@/lib/api';
+import { FiArrowLeft, FiEdit, FiSend, FiTrash2, FiRefreshCw, FiExternalLink, FiImage } from 'react-icons/fi';
 import Link from 'next/link';
 import { format } from 'date-fns';
 
@@ -16,6 +16,8 @@ export default function PostDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [syncingAnalytics, setSyncingAnalytics] = useState(false);
+  const [syncingYouTubeAnalytics, setSyncingYouTubeAnalytics] = useState(false);
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   useEffect(() => {
@@ -74,6 +76,43 @@ export default function PostDetailsPage() {
     }
   };
 
+  const handleSyncYouTubeAnalytics = async () => {
+    try {
+      setSyncingYouTubeAnalytics(true);
+      await youtubeAPI.syncAnalytics(post._id);
+      fetchPost();
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Error syncing YouTube analytics');
+    } finally {
+      setSyncingYouTubeAnalytics(false);
+    }
+  };
+
+  const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Thumbnail must be less than 2MB');
+      return;
+    }
+
+    try {
+      setUploadingThumbnail(true);
+      await youtubeAPI.uploadThumbnail(post._id, file);
+      alert('Thumbnail uploaded successfully!');
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Error uploading thumbnail');
+    } finally {
+      setUploadingThumbnail(false);
+    }
+  };
+
   const handleDelete = async () => {
     try {
       await postsAPI.delete(post._id);
@@ -97,6 +136,11 @@ export default function PostDetailsPage() {
     const emojis: any = {
       snapchat: '👻',
       instagram: '📷',
+      youtube: '▶️',
+      snapchat_instagram: '👻📷',
+      snapchat_youtube: '👻▶️',
+      instagram_youtube: '📷▶️',
+      all: '🚀',
       both: '🚀',
     };
     return emojis[platform] || '📱';
@@ -364,6 +408,94 @@ export default function PostDetailsPage() {
                       <div className="stat-value text-2xl">
                         {post.analytics?.instagram?.engagement || 0}
                       </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* YouTube Analytics */}
+              {post.status === 'published' && post.youtubeVideoId && (
+                <div className="mt-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-xl font-semibold">▶️ YouTube Analytics</h2>
+                    <div className="flex gap-2">
+                      <button
+                        className={`btn btn-sm btn-ghost ${syncingYouTubeAnalytics ? 'loading' : ''}`}
+                        onClick={handleSyncYouTubeAnalytics}
+                        disabled={syncingYouTubeAnalytics}
+                      >
+                        {!syncingYouTubeAnalytics && <FiRefreshCw />}
+                        {syncingYouTubeAnalytics ? 'Syncing...' : 'Refresh Analytics'}
+                      </button>
+                      <label className={`btn btn-sm btn-primary ${uploadingThumbnail ? 'loading' : ''}`}>
+                        {!uploadingThumbnail && <FiImage />}
+                        {uploadingThumbnail ? 'Uploading...' : 'Upload Thumbnail'}
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={handleThumbnailUpload}
+                          disabled={uploadingThumbnail}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                  
+                  {post.analytics?.lastSynced && (
+                    <p className="text-sm opacity-60 mb-3">
+                      Last synced: {format(new Date(post.analytics.lastSynced), 'MMM d, h:mm a')}
+                    </p>
+                  )}
+
+                  {/* YouTube Video Link */}
+                  <a
+                    href={`https://www.youtube.com/watch?v=${post.youtubeVideoId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-sm btn-outline mb-4 gap-2"
+                  >
+                    <FiExternalLink />
+                    View on YouTube
+                  </a>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="stat bg-base-200 rounded-lg">
+                      <div className="stat-figure text-primary">👁️</div>
+                      <div className="stat-title">Views</div>
+                      <div className="stat-value text-2xl">
+                        {post.analytics?.youtube?.views?.toLocaleString() || 0}
+                      </div>
+                    </div>
+
+                    <div className="stat bg-base-200 rounded-lg">
+                      <div className="stat-figure text-error">❤️</div>
+                      <div className="stat-title">Likes</div>
+                      <div className="stat-value text-2xl">
+                        {post.analytics?.youtube?.likes?.toLocaleString() || 0}
+                      </div>
+                    </div>
+
+                    <div className="stat bg-base-200 rounded-lg">
+                      <div className="stat-figure">💬</div>
+                      <div className="stat-title">Comments</div>
+                      <div className="stat-value text-2xl">
+                        {post.analytics?.youtube?.comments?.toLocaleString() || 0}
+                      </div>
+                    </div>
+
+                    <div className="stat bg-base-200 rounded-lg">
+                      <div className="stat-figure">⏱️</div>
+                      <div className="stat-title">Watch Time</div>
+                      <div className="stat-value text-2xl">
+                        {Math.round((post.analytics?.youtube?.watchTime || 0) / 60)}m
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="alert alert-info mt-4">
+                    <div className="text-sm">
+                      💡 <strong>Tip:</strong> Custom thumbnails can increase click-through rates by up to 154%! 
+                      Upload a custom thumbnail (max 2MB) to make your video stand out.
                     </div>
                   </div>
                 </div>

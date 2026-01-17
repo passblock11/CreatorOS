@@ -91,6 +91,18 @@ export const youtubeAPI = {
   disconnect: () => api.post('/youtube/disconnect'),
   
   getStatus: () => api.get('/youtube/status'),
+  
+  syncAnalytics: (postId: string) => api.post(`/youtube/analytics/${postId}`),
+  
+  uploadThumbnail: (postId: string, thumbnailFile: File) => {
+    const formData = new FormData();
+    formData.append('thumbnail', thumbnailFile);
+    return api.post(`/youtube/thumbnail/${postId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
 };
 
 export const stripeAPI = {
