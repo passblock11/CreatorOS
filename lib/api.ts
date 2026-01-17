@@ -110,6 +110,25 @@ export const uploadAPI = {
     api.delete('/upload/media', { data: { publicId, resourceType } }),
 };
 
+export const mediaLibraryAPI = {
+  getMedia: (params?: any) => api.get('/media-library', { params }),
+  
+  getMediaById: (id: string) => api.get(`/media-library/${id}`),
+  
+  updateMedia: (id: string, data: { tags?: string[]; category?: string; description?: string }) =>
+    api.put(`/media-library/${id}`, data),
+  
+  deleteMedia: (id: string) => api.delete(`/media-library/${id}`),
+  
+  bulkDelete: (mediaIds: string[]) => api.post('/media-library/bulk-delete', { mediaIds }),
+  
+  getStats: () => api.get('/media-library/stats'),
+  
+  getTags: () => api.get('/media-library/tags'),
+  
+  getCategories: () => api.get('/media-library/categories'),
+};
+
 export const adminAPI = {
   getUsers: (params?: any) => api.get('/admin/users', { params }),
   

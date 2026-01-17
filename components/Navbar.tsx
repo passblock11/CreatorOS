@@ -44,6 +44,9 @@ export default function Navbar() {
               <Link href="/posts">Posts</Link>
             </li>
             <li>
+              <Link href="/library">Media Library</Link>
+            </li>
+            <li>
               <Link href="/pricing">Pricing</Link>
             </li>
             {isAdmin() && (
@@ -66,6 +69,9 @@ export default function Navbar() {
           </li>
           <li>
             <Link href="/posts">Posts</Link>
+          </li>
+          <li>
+            <Link href="/library">Media Library</Link>
           </li>
           <li>
             <Link href="/pricing">Pricing</Link>
