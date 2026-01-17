@@ -45,6 +45,10 @@ export const authAPI = {
   
   updateProfile: (data: { name: string }) =>
     api.put('/auth/profile', data),
+  
+  resetMonthlyUsage: () => api.post('/auth/reset-usage'),
+  
+  fixSubscription: () => api.post('/auth/fix-subscription'),
 };
 
 export const postsAPI = {

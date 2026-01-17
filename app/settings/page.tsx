@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { authAPI, snapchatAPI, instagramAPI, stripeAPI } from '@/lib/api';
-import { FiUser, FiCreditCard, FiLink } from 'react-icons/fi';
+import { FiUser, FiCreditCard, FiLink, FiRefreshCw, FiTool } from 'react-icons/fi';
 
 function SettingsContent() {
   const searchParams = useSearchParams();
@@ -14,6 +14,8 @@ function SettingsContent() {
   const [instagramStatus, setInstagramStatus] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [fixingUsage, setFixingUsage] = useState(false);
+  const [fixingSub, setFixingSub] = useState(false);
   const [name, setName] = useState('');
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
@@ -120,6 +122,42 @@ function SettingsContent() {
       window.location.href = response.data.url;
     } catch (error) {
       console.error('Error creating portal session:', error);
+    }
+  };
+
+  const handleResetUsage = async () => {
+    setFixingUsage(true);
+    setError('');
+    setSuccess('');
+    try {
+      await authAPI.resetMonthlyUsage();
+      setSuccess('Monthly usage counter reset successfully!');
+      setTimeout(() => {
+        setSuccess('');
+        fetchData();
+      }, 2000);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Error resetting usage');
+    } finally {
+      setFixingUsage(false);
+    }
+  };
+
+  const handleFixSubscription = async () => {
+    setFixingSub(true);
+    setError('');
+    setSuccess('');
+    try {
+      const response = await authAPI.fixSubscription();
+      setSuccess(response.data.message);
+      setTimeout(() => {
+        setSuccess('');
+        fetchData();
+      }, 2000);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Error fixing subscription');
+    } finally {
+      setFixingSub(false);
     }
   };
 
@@ -281,10 +319,56 @@ function SettingsContent() {
                     <p className="text-sm text-base-content/70 mt-1">
                       Status: {user?.subscription?.status}
                     </p>
+                    <p className="text-sm text-base-content/70 mt-1">
+                      Posts this month: {user?.usage?.postsThisMonth || 0}
+                    </p>
                   </div>
                   <button className="btn btn-outline" onClick={handleManageSubscription}>
                     Manage Subscription
                   </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="card bg-base-100 shadow-xl border-2 border-warning/30">
+              <div className="card-body">
+                <h2 className="card-title text-warning">
+                  <FiTool /> Account Utilities
+                </h2>
+                <p className="text-sm text-base-content/70 mb-4">
+                  Use these tools if you notice any issues with your account
+                </p>
+                
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="border border-base-300 rounded-lg p-4">
+                    <h3 className="font-semibold mb-2">Reset Monthly Counter</h3>
+                    <p className="text-sm text-base-content/70 mb-3">
+                      Reset your monthly post usage counter if it's showing incorrect numbers
+                    </p>
+                    <button
+                      className={`btn btn-sm btn-warning ${fixingUsage ? 'loading' : ''}`}
+                      onClick={handleResetUsage}
+                      disabled={fixingUsage}
+                    >
+                      {!fixingUsage && <FiRefreshCw />}
+                      Reset Counter
+                    </button>
+                  </div>
+
+                  <div className="border border-base-300 rounded-lg p-4">
+                    <h3 className="font-semibold mb-2">Fix Subscription Status</h3>
+                    <p className="text-sm text-base-content/70 mb-3">
+                      Verify and fix your subscription status with Stripe
+                    </p>
+                    <button
+                      className={`btn btn-sm btn-warning ${fixingSub ? 'loading' : ''}`}
+                      onClick={handleFixSubscription}
+                      disabled={fixingSub}
+                    >
+                      {!fixingSub && <FiTool />}
+                      Fix Subscription
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
