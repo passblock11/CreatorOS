@@ -341,9 +341,9 @@ function SettingsContent() {
                 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="border border-base-300 rounded-lg p-4">
-                    <h3 className="font-semibold mb-2">Reset Monthly Counter</h3>
+                    <h3 className="font-semibold mb-2">Recalculate Monthly Posts</h3>
                     <p className="text-sm text-base-content/70 mb-3">
-                      Reset your monthly post usage counter if it's showing incorrect numbers
+                      Recalculates your posts this month from actual database records
                     </p>
                     <button
                       className={`btn btn-sm btn-warning ${fixingUsage ? 'loading' : ''}`}
@@ -351,7 +351,7 @@ function SettingsContent() {
                       disabled={fixingUsage}
                     >
                       {!fixingUsage && <FiRefreshCw />}
-                      Reset Counter
+                      Recalculate
                     </button>
                   </div>
 
