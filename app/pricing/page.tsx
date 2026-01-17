@@ -44,9 +44,56 @@ export default function PricingPage() {
     }
   };
 
+  const getPlanTier = (planId: string): number => {
+    const tiers: { [key: string]: number } = {
+      free: 0,
+      pro: 1,
+      business: 2,
+    };
+    return tiers[planId] || 0;
+  };
+
+  const getButtonText = (planId: string): string => {
+    if (!authenticated) {
+      return planId === 'free' ? 'Get Started' : 'Subscribe';
+    }
+
+    if (currentPlan === planId) {
+      return 'Current Plan';
+    }
+
+    const currentTier = getPlanTier(currentPlan);
+    const targetTier = getPlanTier(planId);
+
+    if (targetTier < currentTier) {
+      return 'Downgrade';
+    } else if (targetTier > currentTier) {
+      return 'Upgrade';
+    }
+
+    return 'Subscribe';
+  };
+
   const handleSubscribe = async (planId: string) => {
     if (!authenticated) {
       router.push('/register');
+      return;
+    }
+
+    // If trying to downgrade, show confirmation
+    const currentTier = getPlanTier(currentPlan);
+    const targetTier = getPlanTier(planId);
+
+    if (targetTier < currentTier) {
+      const confirmDowngrade = window.confirm(
+        `Are you sure you want to downgrade from ${currentPlan.toUpperCase()} to ${planId.toUpperCase()}?\n\n` +
+        `You will lose access to premium features. To downgrade, please cancel your subscription in Settings.`
+      );
+      if (!confirmDowngrade) {
+        return;
+      }
+      // Redirect to settings to manage subscription
+      router.push('/settings');
       return;
     }
 
@@ -133,20 +180,22 @@ export default function PricingPage() {
                 </ul>
 
                 <button
-                  className={`btn ${plan.id === 'pro' ? 'btn-primary' : 'btn-outline'} ${
-                    subscribing === plan.id || (authenticated && currentPlan === plan.id) ? 'btn-disabled' : ''
-                  }`}
+                  className={`btn ${
+                    authenticated && currentPlan === plan.id
+                      ? 'btn-disabled'
+                      : getPlanTier(plan.id) < getPlanTier(currentPlan)
+                      ? 'btn-outline btn-warning'
+                      : plan.id === 'pro'
+                      ? 'btn-primary'
+                      : 'btn-outline'
+                  } ${subscribing === plan.id ? 'btn-disabled' : ''}`}
                   onClick={() => handleSubscribe(plan.id)}
                   disabled={subscribing === plan.id || (authenticated && currentPlan === plan.id)}
                 >
                   {subscribing === plan.id ? (
                     <span className="loading loading-spinner"></span>
-                  ) : authenticated && currentPlan === plan.id ? (
-                    'Current Plan'
-                  ) : plan.id === 'free' ? (
-                    'Get Started'
                   ) : (
-                    'Subscribe'
+                    getButtonText(plan.id)
                   )}
                 </button>
               </div>
