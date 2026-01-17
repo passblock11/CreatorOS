@@ -85,6 +85,14 @@ export const instagramAPI = {
   getStatus: () => api.get('/instagram/status'),
 };
 
+export const youtubeAPI = {
+  getAuthURL: () => api.get('/youtube/auth-url'),
+  
+  disconnect: () => api.post('/youtube/disconnect'),
+  
+  getStatus: () => api.get('/youtube/status'),
+};
+
 export const stripeAPI = {
   getPlans: () => api.get('/stripe/plans'),
   

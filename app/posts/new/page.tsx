@@ -242,10 +242,18 @@ export default function NewPostPage() {
                 >
                   <option value="snapchat">👻 Snapchat</option>
                   <option value="instagram">📷 Instagram</option>
-                  <option value="both">🚀 Both Platforms</option>
+                  <option value="youtube">▶️ YouTube</option>
+                  <option value="snapchat_instagram">👻📷 Snapchat & Instagram</option>
+                  <option value="snapchat_youtube">👻▶️ Snapchat & YouTube</option>
+                  <option value="instagram_youtube">📷▶️ Instagram & YouTube</option>
+                  <option value="all">🚀 All Platforms</option>
                 </select>
                 <label className="label">
-                  <span className="label-text-alt">Select where to publish this post</span>
+                  <span className="label-text-alt">
+                    {formData.platform.includes('youtube') 
+                      ? 'YouTube requires video content only' 
+                      : 'Select where to publish this post'}
+                  </span>
                 </label>
               </div>
 

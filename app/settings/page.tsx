@@ -4,14 +4,15 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import { authAPI, snapchatAPI, instagramAPI, stripeAPI } from '@/lib/api';
-import { FiUser, FiCreditCard, FiLink, FiRefreshCw, FiTool } from 'react-icons/fi';
+import { authAPI, snapchatAPI, instagramAPI, youtubeAPI, stripeAPI } from '@/lib/api';
+import { FiUser, FiCreditCard, FiLink, FiRefreshCw, FiTool, FiYoutube } from 'react-icons/fi';
 
 function SettingsContent() {
   const searchParams = useSearchParams();
   const [user, setUser] = useState<any>(null);
   const [snapchatStatus, setSnapchatStatus] = useState<any>(null);
   const [instagramStatus, setInstagramStatus] = useState<any>(null);
+  const [youtubeStatus, setYoutubeStatus] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [fixingUsage, setFixingUsage] = useState(false);
@@ -23,6 +24,8 @@ function SettingsContent() {
   useEffect(() => {
     const snapchatParam = searchParams.get('snapchat');
     const instagramParam = searchParams.get('instagram');
+    const successParam = searchParams.get('success');
+    const errorParam = searchParams.get('error');
     const messageParam = searchParams.get('message');
     
     if (snapchatParam === 'connected' || snapchatParam === 'success') {
@@ -41,21 +44,33 @@ function SettingsContent() {
       setTimeout(() => setError(''), 5000);
     }
     
+    // Handle YouTube from query params
+    if (successParam) {
+      setSuccess(successParam);
+      setTimeout(() => setSuccess(''), 5000);
+    }
+    if (errorParam) {
+      setError(errorParam);
+      setTimeout(() => setError(''), 5000);
+    }
+    
     fetchData();
   }, [searchParams]);
 
   const fetchData = async () => {
     try {
-      const [userRes, snapchatRes, instagramRes] = await Promise.all([
+      const [userRes, snapchatRes, instagramRes, youtubeRes] = await Promise.all([
         authAPI.getMe(),
         snapchatAPI.getStatus(),
         instagramAPI.getStatus(),
+        youtubeAPI.getStatus(),
       ]);
 
       setUser(userRes.data.user);
       setName(userRes.data.user.name);
       setSnapchatStatus(snapchatRes.data);
       setInstagramStatus(instagramRes.data);
+      setYoutubeStatus(youtubeRes.data);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -111,6 +126,24 @@ function SettingsContent() {
     try {
       await instagramAPI.disconnect();
       setInstagramStatus({ isConnected: false });
+    } catch (error) {
+      console.error('Error disconnecting:', error);
+    }
+  };
+
+  const handleConnectYouTube = async () => {
+    try {
+      const response = await youtubeAPI.getAuthURL();
+      window.location.href = response.data.authUrl;
+    } catch (error) {
+      console.error('Error getting auth URL:', error);
+    }
+  };
+
+  const handleDisconnectYouTube = async () => {
+    try {
+      await youtubeAPI.disconnect();
+      setYoutubeStatus({ isConnected: false });
     } catch (error) {
       console.error('Error disconnecting:', error);
     }
@@ -276,7 +309,7 @@ function SettingsContent() {
                 </div>
 
                 {/* Instagram */}
-                <div className="flex items-center justify-between py-3">
+                <div className="flex items-center justify-between py-3 border-b border-base-300">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 rounded-lg flex items-center justify-center text-2xl">
                       📷
@@ -296,6 +329,32 @@ function SettingsContent() {
                     </button>
                   ) : (
                     <button className="btn btn-primary btn-sm" onClick={handleConnectInstagram}>
+                      Connect
+                    </button>
+                  )}
+                </div>
+
+                {/* YouTube */}
+                <div className="flex items-center justify-between py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center text-2xl">
+                      ▶️
+                    </div>
+                    <div>
+                      <p className="font-semibold">YouTube</p>
+                      <p className="text-sm text-base-content/70">
+                        {youtubeStatus?.isConnected
+                          ? `${youtubeStatus.channel?.channelTitle}`
+                          : 'Connect your YouTube channel'}
+                      </p>
+                    </div>
+                  </div>
+                  {youtubeStatus?.isConnected ? (
+                    <button className="btn btn-error btn-sm btn-outline" onClick={handleDisconnectYouTube}>
+                      Disconnect
+                    </button>
+                  ) : (
+                    <button className="btn btn-primary btn-sm" onClick={handleConnectYouTube}>
                       Connect
                     </button>
                   )}
