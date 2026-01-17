@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { FiLogOut, FiUser, FiSettings, FiMenu } from 'react-icons/fi';
 import { getUser, removeToken, isAdmin } from '@/lib/auth';
-
+//Navbar component for the app
 export default function Navbar() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
