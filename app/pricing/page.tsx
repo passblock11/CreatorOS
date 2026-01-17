@@ -4,20 +4,24 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { stripeAPI } from '@/lib/api';
+import { stripeAPI, authAPI } from '@/lib/api';
 import { isAuthenticated } from '@/lib/auth';
 import { FiCheck } from 'react-icons/fi';
 
 export default function PricingPage() {
   const router = useRouter();
   const [plans, setPlans] = useState<any[]>([]);
+  const [currentPlan, setCurrentPlan] = useState<string>('free');
   const [loading, setLoading] = useState(true);
   const [subscribing, setSubscribing] = useState<string | null>(null);
   const authenticated = isAuthenticated();
 
   useEffect(() => {
     fetchPlans();
-  }, []);
+    if (authenticated) {
+      fetchUserPlan();
+    }
+  }, [authenticated]);
 
   const fetchPlans = async () => {
     try {
@@ -27,6 +31,16 @@ export default function PricingPage() {
       console.error('Error fetching plans:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUserPlan = async () => {
+    try {
+      const response = await authAPI.getMe();
+      setCurrentPlan(response.data.user.subscription.plan || 'free');
+    } catch (error) {
+      console.error('Error fetching user plan:', error);
+      setCurrentPlan('free');
     }
   };
 
@@ -78,10 +92,17 @@ export default function PricingPage() {
           {plans.map((plan) => (
             <div
               key={plan.id}
-              className={`card bg-base-100 shadow-xl ${
-                plan.id === 'pro' ? 'border-2 border-primary' : ''
+              className={`card bg-base-100 shadow-xl relative ${
+                authenticated && currentPlan === plan.id
+                  ? 'border-4 border-success'
+                  : plan.id === 'pro'
+                  ? 'border-2 border-primary'
+                  : ''
               }`}
             >
+              {authenticated && currentPlan === plan.id && (
+                <div className="badge badge-success absolute left-4 top-4">Current Plan</div>
+              )}
               {plan.id === 'pro' && (
                 <div className="badge badge-primary absolute right-4 top-4">Most Popular</div>
               )}
@@ -113,15 +134,17 @@ export default function PricingPage() {
 
                 <button
                   className={`btn ${plan.id === 'pro' ? 'btn-primary' : 'btn-outline'} ${
-                    subscribing === plan.id ? 'btn-disabled' : ''
+                    subscribing === plan.id || (authenticated && currentPlan === plan.id) ? 'btn-disabled' : ''
                   }`}
                   onClick={() => handleSubscribe(plan.id)}
-                  disabled={subscribing === plan.id || (plan.id === 'free' && authenticated)}
+                  disabled={subscribing === plan.id || (authenticated && currentPlan === plan.id)}
                 >
                   {subscribing === plan.id ? (
                     <span className="loading loading-spinner"></span>
+                  ) : authenticated && currentPlan === plan.id ? (
+                    'Current Plan'
                   ) : plan.id === 'free' ? (
-                    authenticated ? 'Current Plan' : 'Get Started'
+                    'Get Started'
                   ) : (
                     'Subscribe'
                   )}
